@@ -8,7 +8,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class BuggyController extends AbstractController
 {
-
     #[Route('/buggy', name: 'app_buggy')]
     public function index(): JsonResponse
     {
