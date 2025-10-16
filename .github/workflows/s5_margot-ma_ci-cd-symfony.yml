@@ -1,0 +1,44 @@
+name: Symfony CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "ressources/s5/margot-ma/projets/ci-cd-symfony/**"
+
+defaults:
+  run:
+    working-directory: ressources/s5/margot-ma/projets/ci-cd-symfony
+
+jobs:
+  ci-symfony:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          coverage: pcov
+
+      - name: Install dependencies
+        run: composer install --no-progress --prefer-dist --no-scripts
+
+      - name: Run PHP-CS-Fixer
+        run: ./vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: Run PHP lint
+        run: find src tests -name "*.php" -exec php -l {} \;
+
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse
+
+      - name: Run PHPUnit
+        run: ./vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+
+      - name: Audit de sécurité
+        run: composer audit --format=json --no-interaction
+        continue-on-error: true # Permettre au CI de continuer même si des vulnérabilités sont détectées

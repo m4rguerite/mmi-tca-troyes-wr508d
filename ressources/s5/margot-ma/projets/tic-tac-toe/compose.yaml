@@ -1,0 +1,17 @@
+name: python-morpion
+
+services:
+  python-env:
+    image: quay.io/jupyter/scipy-notebook:2024-12-23
+    volumes:
+      - .:/app  # Monte le dossier courant dans /app du conteneur
+      - python-packages:/usr/local/lib/python3.13/site-packages  # Persiste les packages
+    working_dir: /app  # Définit /app comme répertoire de travail
+    tty: true  # Permet de garder le conteneur ouvert
+    stdin_open: true  # Permet d'interagir avec le conteneur
+    ports:
+      - "8888:8888"
+    command: bash  # Ouvre un shell bash au démarrage
+
+volumes:
+  python-packages:  # Définit un volume nommé pour les packages
