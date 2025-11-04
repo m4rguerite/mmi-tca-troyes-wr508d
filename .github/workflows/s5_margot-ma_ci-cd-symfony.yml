@@ -42,3 +42,37 @@ jobs:
       - name: Audit de sécurité
         run: composer audit --format=json --no-interaction
         continue-on-error: true # Permettre au CI de continuer même si des vulnérabilités sont détectées
+
+      - name: Dump environment variables for production
+        run: |
+          composer dump-env prod
+        env:
+          APP_ENV: prod
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Installer les dépendances de production
+        run: composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+
+      - name: Optimiser les assets
+        run: php bin/console asset-map:compile
+
+      - name: Créer l'archive de l'artefact
+        run: tar -czvf symfony-artifact-r1.tar.gz \
+            --exclude=.git \
+            --exclude=node_modules \
+            --exclude=var/cache \
+            --exclude=var/log \
+            --exclude=tests \
+            --exclude=.env \
+            --exclude=docker \
+            --exclude=docker-compose.yml \
+            --exclude=README.md \
+            --exclude=*.log \
+            --exclude=*.gitignore \
+            .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: symfony-artifact
+          path: symfony-artifact-r1.tar.gz
